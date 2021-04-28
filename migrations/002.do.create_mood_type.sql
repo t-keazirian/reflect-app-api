@@ -1,0 +1,1 @@
+CREATE TYPE mood AS ENUM ('sad', 'meh', 'happy');
