@@ -33,42 +33,42 @@ reflectionsRouter
 					.json(meditation);
 			})
 			.catch(next);
+	});
+
+reflectionsRouter
+	.route('/:id')
+	.all((req, res, next) => {
+		ReflectionsService.getMeditationById(req.app.get('db'), req.params.id)
+			.then(meditation => {
+				if (!meditation) {
+					return res.status(404).json({
+						error: { message: `Meditation doesn't exist` },
+					});
+				}
+				res.meditation = meditation;
+				next();
+			})
+			.catch(next);
 	})
+	.get((req, res, next) => {
+		res.json({
+			id: res.meditation.id,
+			description: res.meditation.description,
+			minutes: res.meditation.minutes,
+			current_mood: res.meditation.current_mood,
+			notes: res.meditation.notes,
+			date: res.meditation.date,
+		});
+	});
 
+// should I do something besides .end() here? I tried to .json send a message but it didn't work
   reflectionsRouter
-    .route('/:id')
-    .all((req, res, next) => {
-      ReflectionsService.getMeditationById(req.app.get('db'), req.params.id)
-        .then(meditation => {
-          if (!meditation) {
-            return res.status(404).json({
-              error: {message: `Meditation doesn't exist`}
-            })
-          }
-          res.meditation = meditation;
-          next();
-        })
-        .catch(next)
-    })
-    .get((req, res, next) => {
-      res.json({
-        id: res.meditation.id,
-        description: res.meditation.description,
-        minutes: res.meditation.minutes,
-        current_mood: res.meditation.current_mood,
-        notes: res.meditation.notes,
-        date: res.meditation.date
-      })
-    })
-
-    // should I do something besides .end() here? I tried to .json send a message but it didn't work
-
-    .delete((req, res, next) => {
-      ReflectionsService.deleteMeditation(req.app.get('db'), req.params.id)
-        .then(() => {
-          res.status(204).end()
-        })
-        .catch(next)
-    })
+    .route('/:id').delete((req, res, next) => {
+	    ReflectionsService.deleteMeditation(req.app.get('db'), req.params.id)
+		.then(() => {
+			res.status(204).end();
+		})
+		.catch(next);
+});
 
 module.exports = reflectionsRouter;
