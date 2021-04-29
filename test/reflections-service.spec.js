@@ -19,8 +19,8 @@ describe('Reflections endpoint', () => {
 	});
 
 	after('disconnect from db', () => db.destroy());
-	before('clean table', () => db('reflections').truncate());
-	afterEach('cleanup', () => db('reflections').truncate());
+	before('clean table', () => db('meditations').truncate());
+	afterEach('cleanup', () => db('meditations').truncate());
 
 	describe('GET /api/reflections', () => {
 		context('Given no meditations', () => {
@@ -33,7 +33,7 @@ describe('Reflections endpoint', () => {
 			const testMeditations = makeMeditationsArray();
 
 			beforeEach('insert meditations', () => {
-				return db.into('reflections').insert(testMeditations);
+				return db.into('meditations').insert(testMeditations);
 			});
 
 			it('responds with 200 and all the meditations', () => {
@@ -50,7 +50,7 @@ describe('Reflections endpoint', () => {
 				description: 'inspired',
 				minutes: 5,
 				notes: 'test notes',
-				mood: 'happy',
+				current_mood: 'happy',
 			};
 
 			return supertest(app)
@@ -61,7 +61,7 @@ describe('Reflections endpoint', () => {
 					expect(res.body.description).to.eql(newMeditation.description);
 					expect(res.body.minutes).to.eql(newMeditation.minutes);
 					expect(res.body.notes).to.eql(newMeditation.notes);
-					expect(res.body.mood).to.eql(newMeditation.mood);
+					expect(res.body.current_mood).to.eql(newMeditation.current_mood);
 					expect(res.body).to.have.property('id');
 					expect(res.headers.location).to.eql(
 						`/api/reflections/${res.body.id}`
@@ -71,6 +71,28 @@ describe('Reflections endpoint', () => {
 					supertest(app).get(`/api/reflections/${postRes.body.id}`);
 					expect(postRes.body);
 				});
+		});
+
+		const requiredFields = ['description', 'current_mood', 'notes'];
+
+		requiredFields.forEach(field => {
+			const newMeditation = {
+				description: 'inspired',
+				notes: 'test notes',
+        minutes: 5,
+				current_mood: 'happy',
+			};
+
+			it(`responds with 400 and an error message when the ${field} is missing`, () => {
+				delete newMeditation[field];
+
+				return supertest(app)
+					.post('/api/reflections')
+					.send(newMeditation)
+					.expect(400, {
+						error: { message: `Missing ${field} in request body` },
+					});
+			});
 		});
 	});
 
@@ -87,7 +109,7 @@ describe('Reflections endpoint', () => {
 		context('Given there are meditations in the db', () => {
 			const testMeditations = makeMeditationsArray();
 			beforeEach('insert meditations', () => {
-				return db.into('reflections').insert(testMeditations);
+				return db.into('meditations').insert(testMeditations);
 			});
 
 			it('responds with 204 and removes the goal', () => {
@@ -106,29 +128,29 @@ describe('Reflections endpoint', () => {
 		});
 	});
 
-  describe('GET /api/reflections/:id', () => {
-    context('Given no meditations', () => {
-      it('responds with 404', () => {
-        const id = 12345;
-        return supertest(app)
-          .get(`/api/reflections/${id}`)
-          .expect(404, {error: {message: `Meditation doesn't exist`}})
-      })
-    })
+	describe('GET /api/reflections/:id', () => {
+		context('Given no meditations', () => {
+			it('responds with 404', () => {
+				const id = 12345;
+				return supertest(app)
+					.get(`/api/reflections/${id}`)
+					.expect(404, { error: { message: `Meditation doesn't exist` } });
+			});
+		});
 
-    context('Given there are meditations in the db', () => {
-      const testMeditations = makeMeditationsArray();
-      beforeEach('insert meditations', () => {
-				return db.into('reflections').insert(testMeditations);
+		context('Given there are meditations in the db', () => {
+			const testMeditations = makeMeditationsArray();
+			beforeEach('insert meditations', () => {
+				return db.into('meditations').insert(testMeditations);
 			});
 
-      it('responds with 200 and the specified goal', () => {
-        const id = 3;
-        const expectedMeditation = testMeditations[id - 2];
-        return supertest(app).get(`/api/reflections/${id}`).expect(200, expectedMeditation)
-      })
-      
-    })
-  })
-
+			it('responds with 200 and the specified goal', () => {
+				const id = 3;
+				const expectedMeditation = testMeditations[id - 1];
+				return supertest(app)
+					.get(`/api/reflections/${id}`)
+					.expect(200, expectedMeditation);
+			});
+		});
+	});
 });
