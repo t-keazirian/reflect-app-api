@@ -4,6 +4,7 @@ const morgan = require('morgan');
 const cors = require('cors');
 const helmet = require('helmet');
 const { NODE_ENV, CLIENT_ORIGIN } = require('./config');
+const reflectionsRouter = require('./reflections/reflections-router');
 
 const app = express();
 
@@ -17,6 +18,8 @@ app.use(
 		origin: CLIENT_ORIGIN,
 	})
 );
+
+app.use('/api/reflections', reflectionsRouter)
 
 app.get('/api/', (req, res) => {
 	res.send('Hello, world!');
