@@ -8,7 +8,7 @@ const jsonParser = express.json();
 reflectionsRouter
 	.route('/')
 	.get((req, res, next) => {
-		ReflectionsService.getAllMeditations(req.app.get('db'))
+		ReflectionsService.getAllMeditations(req.app.get('db'), req.query)
 			.then(meditations => {
 				res.json(meditations);
 			})
@@ -61,14 +61,10 @@ reflectionsRouter
 		});
 	});
 
-// should I do something besides .end() here? I tried to .json send a message but it didn't work
-  reflectionsRouter
-    .route('/:id').delete((req, res, next) => {
-	    ReflectionsService.deleteMeditation(req.app.get('db'), req.params.id)
-		.then(() => {
-			res.status(204).end();
-		})
-		.catch(next);
-});
+reflectionsRouter.route('/:id').delete((req, res, next) =>
+	ReflectionsService.deleteMeditation(req.app.get('db'), req.params.id)
+		.then(() => res.status(204).end())
+		.catch(next)
+);
 
 module.exports = reflectionsRouter;

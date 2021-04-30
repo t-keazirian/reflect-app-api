@@ -1,9 +1,14 @@
 const ReflectionsService = {
-
-	getAllMeditations(knex) {
+	getAllMeditations(knex, query) {
+		// check query for white listed keys
 		return knex
-      .select('*')
-      .from('meditations');
+			.select('*')
+			.from('meditations')
+			.modify(queryBuilder => {
+				if (query.mood) {
+					queryBuilder.where('current_mood', query.mood);
+				}
+			});
 	},
 
 	insertMeditation(knex, newReflection) {
@@ -16,14 +21,8 @@ const ReflectionsService = {
 			});
 	},
 
-	// does it matter if I put .from first or .select first?
-
 	getMeditationById(knex, id) {
-		return knex
-      .from('meditations')
-      .select('*')
-      .where('id', id)
-      .first();
+		return knex.from('meditations').select('*').where('id', id).first();
 	},
 
 	// check on this one??
@@ -37,14 +36,11 @@ const ReflectionsService = {
 			});
 	},
 
-  // should I do anything besides delete()
+	// add .put()
 
-  deleteMeditation(knex, id) {
-    return knex
-      .from('meditations')
-      .where({id})
-      .delete()
-  }
+	deleteMeditation(knex, id) {
+		return knex.from('meditations').where({ id }).delete();
+	},
 };
 
 module.exports = ReflectionsService;
