@@ -1,5 +1,3 @@
-// write a test for getMeditationByMood if applicable
-//  no need for patch, correct?
 // did I write the migrations and the seeds correctly?
 
 const { expect } = require('chai');
@@ -79,7 +77,7 @@ describe('Reflections endpoint', () => {
 			const newMeditation = {
 				description: 'inspired',
 				notes: 'test notes',
-        minutes: 5,
+				minutes: 5,
 				current_mood: 'happy',
 			};
 
@@ -150,6 +148,45 @@ describe('Reflections endpoint', () => {
 				return supertest(app)
 					.get(`/api/reflections/${id}`)
 					.expect(200, expectedMeditation);
+			});
+		});
+	});
+
+	describe('PATCH /api/reflections/:id', () => {
+		context('Given no meditations', () => {
+			it('responds with 404', () => {
+				const id = 12345;
+				return supertest(app)
+					.patch(`/api/reflections/${id}`)
+					.expect(404, { error: { message: `Meditation doesn't exist` } });
+			});
+		});
+
+		context('Given there are meditations in the db', () => {
+			const testMeditations = makeMeditationsArray();
+			beforeEach('insert meditations', () => {
+				return db.into('meditations').insert(testMeditations);
+			});
+
+			it('responds with 204 and the updated goal', () => {
+				const idToUpdate = 1;
+				const updatedMeditation = {
+					description: 'Updated description',
+				};
+				const expectedMeditation = {
+					...testMeditations[idToUpdate - 1],
+					...updatedMeditation,
+				};
+
+				return supertest(app)
+					.patch(`/api/reflections/${idToUpdate}`)
+					.send(updatedMeditation)
+					.expect(204)
+					.then(res => {
+						supertest(app)
+							.get(`/api/reflections/${idToUpdate}`)
+							.expect(expectedMeditation);
+					});
 			});
 		});
 	});

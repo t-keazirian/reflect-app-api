@@ -36,7 +36,9 @@ const ReflectionsService = {
 			});
 	},
 
-	// add .put()
+	updateMeditation(knex, id, newMeditationFields) {
+		return knex.from('meditations').where({ id }).update(newMeditationFields);
+	},
 
 	deleteMeditation(knex, id) {
 		return knex.from('meditations').where({ id }).delete();

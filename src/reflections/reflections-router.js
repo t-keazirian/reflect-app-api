@@ -59,12 +59,35 @@ reflectionsRouter
 			notes: res.meditation.notes,
 			date: res.meditation.date,
 		});
-	});
+	})
+	.delete((req, res, next) =>
+		ReflectionsService.deleteMeditation(req.app.get('db'), req.params.id)
+			.then(() => res.status(204).end())
+			.catch(next)
+	)
+	.patch(jsonParser, (req, res, next) => {
+		const { description, notes, current_mood } = req.body;
+		const meditationToUpdate = { description, notes, current_mood };
 
-reflectionsRouter.route('/:id').delete((req, res, next) =>
-	ReflectionsService.deleteMeditation(req.app.get('db'), req.params.id)
-		.then(() => res.status(204).end())
-		.catch(next)
-);
+		const numValues = Object.values(meditationToUpdate).filter(Boolean).length;
+
+		if (numValues === 0) {
+			return res.status(400).json({
+				error: {
+					message: `Request body must contain either 'description', 'notes', or 'current mood'`,
+				},
+			});
+		}
+
+		ReflectionsService.updateMeditation(
+			req.app.get('db'),
+			req.params.id,
+			meditationToUpdate
+		)
+			.then(() => {
+				res.status(204).end();
+			})
+			.catch(next);
+	});
 
 module.exports = reflectionsRouter;
