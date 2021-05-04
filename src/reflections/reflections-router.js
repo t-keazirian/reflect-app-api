@@ -2,6 +2,8 @@ const express = require('express');
 const path = require('path');
 const ReflectionsService = require('./reflections-service');
 
+const xss = require('xss');
+
 const reflectionsRouter = express.Router();
 const jsonParser = express.json();
 
@@ -53,10 +55,10 @@ reflectionsRouter
 	.get((req, res, next) => {
 		res.json({
 			id: res.meditation.id,
-			description: res.meditation.description,
+			description: xss(res.meditation.description),
 			minutes: res.meditation.minutes,
 			current_mood: res.meditation.current_mood,
-			notes: res.meditation.notes,
+			notes: xss(res.meditation.notes),
 			date: res.meditation.date,
 		});
 	})

@@ -92,6 +92,38 @@ describe('Reflections endpoint', () => {
 					});
 			});
 		});
+
+		context('Given an XSS attack', () => {
+			it('removes XSS attack content', () => {
+				const maliciousReflection = {
+					id: 911,
+					description:
+						'Naughty naughty very naughty &lt;script&gt;alert("xss");&lt;/script&gt;',
+					notes: `Bad image <img src="https://url.to.file.which/does-not.exist">. But not <strong>all</strong> bad.`,
+					current_mood: 'sad',
+					minutes: 5,
+				};
+				const expectedMeditation = {
+					...maliciousReflection,
+					description:
+						'Naughty naughty very naughty &lt;script&gt;alert("xss");&lt;/script&gt;',
+					notes: `Bad image <img src="https://url.to.file.which/does-not.exist">. But not <strong>all</strong> bad.`,
+					current_mood: 'sad',
+					minutes: 5,
+				};
+				return supertest(app)
+					.post(`/api/reflections`)
+					.send(maliciousReflection)
+					.expect(201)
+					.expect(res => {
+						expect(res.body.description).to.eql(expectedMeditation.description);
+						expect(res.body.current_mood).to.eql(
+							expectedMeditation.current_mood
+						);
+						expect(res.body.notes).to.eql(expectedMeditation.notes);
+					});
+			});
+		});
 	});
 
 	describe('DELETE /api/reflections/:id', () => {
@@ -148,6 +180,30 @@ describe('Reflections endpoint', () => {
 				return supertest(app)
 					.get(`/api/reflections/${id}`)
 					.expect(200, expectedMeditation);
+			});
+		});
+
+		context('Given an XSS attack', () => {
+			const maliciousReflection = {
+				id: 911,
+				description: 'Bad',
+				current_mood: 'sad',
+				notes: 'Bad notes',
+			};
+
+			beforeEach('insert malicious reflection', () => {
+				return db.into('meditations').insert(maliciousReflection);
+			});
+
+			it('removes XSS attack content', () => {
+				return supertest(app)
+					.get(`/api/reflections/${maliciousReflection.id}`)
+					.expect(200)
+					.expect(res => {
+						expect(res.body.description).to.eql('Bad');
+						expect(res.body.current_mood).to.eql('sad');
+						expect(res.body.notes).to.eql('Bad notes');
+					});
 			});
 		});
 	});
