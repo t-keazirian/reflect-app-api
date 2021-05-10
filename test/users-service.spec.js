@@ -6,7 +6,7 @@ const { makeUsersArray } = require('./users.fixtures');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-describe.only('Users Endpoint', () => {
+describe('Users Endpoint', () => {
 	let db;
 	before('make knex instance', () => {
 		db = knex({
@@ -17,7 +17,6 @@ describe.only('Users Endpoint', () => {
 	});
 
 	after('disconnect from db', () => db.destroy());
-	// before('clean table', () => db('users').truncate());
 	before('clean table', () =>
 		db.raw('TRUNCATE meditations, users RESTART IDENTITY CASCADE')
 	);
@@ -25,7 +24,7 @@ describe.only('Users Endpoint', () => {
 		db.raw('TRUNCATE meditations, users RESTART IDENTITY CASCADE')
 	);
 
-	describe('POST /api/reflections/users', () => {
+	describe('POST /api/users', () => {
 		context('User validation,', () => {
 			const testUsers = makeUsersArray();
 			beforeEach('insert users', () => {
@@ -46,7 +45,7 @@ describe.only('Users Endpoint', () => {
 					delete signupAttemptBody[field];
 
 					return supertest(app)
-						.post('/api/reflections/users')
+						.post('/api/users')
 						.send(signupAttemptBody)
 						.expect(400, {
 							error: { message: `Missing ${field} in request body` },
@@ -63,7 +62,7 @@ describe.only('Users Endpoint', () => {
 				};
 
 				return supertest(app)
-					.post('/api/reflections/users')
+					.post('/api/users')
 					.send(userShortPassword)
 					.expect(400, {
 						error: { message: 'Password must be longer than 8 characters' },
@@ -79,7 +78,7 @@ describe.only('Users Endpoint', () => {
 				};
 
 				return supertest(app)
-					.post('/api/reflections/users')
+					.post('/api/users')
 					.send(userLongPassword)
 					.expect(400, {
 						error: { message: 'Password must be less than 72 characters' },
@@ -95,10 +94,10 @@ describe.only('Users Endpoint', () => {
 				};
 
 				return supertest(app)
-					.post('/api/reflections/users')
+					.post('/api/users')
 					.send(userPasswordWithSpaces)
 					.expect(400, {
-						error: { message: 'Password must not start or end with spaces' },
+						error: { message: 'Password must not start or end with empty spaces' },
 					});
 			});
 
@@ -111,10 +110,10 @@ describe.only('Users Endpoint', () => {
 				};
 
 				return supertest(app)
-					.post('/api/reflections/users')
+					.post('/api/users')
 					.send(userPasswordWithSpaces)
 					.expect(400, {
-						error: { message: 'Password must not start or end with spaces' },
+						error: { message: 'Password must not start or end with empty spaces' },
 					});
 			});
 
@@ -127,7 +126,7 @@ describe.only('Users Endpoint', () => {
 				};
 
 				return supertest(app)
-					.post('/api/reflections/users')
+					.post('/api/users')
 					.send(userPasswordNotComplex)
 					.expect(400, {
 						error: {
@@ -146,7 +145,7 @@ describe.only('Users Endpoint', () => {
 				};
 
 				return supertest(app)
-					.post('/api/reflections/users')
+					.post('/api/users')
 					.send(duplicateEmail)
 					.expect(400, { error: { message: 'Email already taken' } });
 			});
@@ -162,7 +161,7 @@ describe.only('Users Endpoint', () => {
 				};
 
 				return supertest(app)
-					.post('/api/reflections/users')
+					.post('/api/users')
 					.send(newUser)
 					.expect(201)
 					.expect(res => {
@@ -172,7 +171,7 @@ describe.only('Users Endpoint', () => {
 						expect(res.body.email).to.eql(newUser.email);
 						expect(res.body).to.not.have.property('password');
 						expect(res.headers.location).to.eql(
-							`/api/reflections/${res.body.id}`
+							`/api/users/${res.body.id}`
 						);
 					})
 					.expect(res => {

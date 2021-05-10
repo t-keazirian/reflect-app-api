@@ -35,10 +35,12 @@ authRouter.post('/login', jsonParser, (req, res, next) => {
 					});
 				}
 
-				const sub = dbUser.email;
-				const payload = { user_id: dbUser.id };
+				const id = dbUser.id;
+				const subject = dbUser.email;
+				const payload = { id: dbUser.id };
 				res.send({
-					authToken: AuthService.createJwt(sub, payload),
+					id,
+					authToken: AuthService.createJwt(subject, payload),
 				});
 			});
 		})
