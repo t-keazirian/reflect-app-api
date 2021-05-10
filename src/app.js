@@ -22,7 +22,7 @@ app.use(
 );
 
 app.use('/api/reflections', reflectionsRouter);
-app.use('/api/users', usersRouter);
+app.use('/api/reflections/users', usersRouter);
 app.use('/api/auth', authRouter);
 
 app.get('/api/', (req, res) => {

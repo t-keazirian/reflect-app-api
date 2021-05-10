@@ -6,7 +6,7 @@ const { makeUsersArray } = require('./users.fixtures');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-describe('Users Endpoint', () => {
+describe.only('Users Endpoint', () => {
 	let db;
 	before('make knex instance', () => {
 		db = knex({
@@ -17,8 +17,13 @@ describe('Users Endpoint', () => {
 	});
 
 	after('disconnect from db', () => db.destroy());
-	before('clean table', () => db('users').truncate());
-	afterEach('cleanup', () => db('users').truncate());
+	// before('clean table', () => db('users').truncate());
+	before('clean table', () =>
+		db.raw('TRUNCATE meditations, users RESTART IDENTITY CASCADE')
+	);
+	afterEach('cleanup', () =>
+		db.raw('TRUNCATE meditations, users RESTART IDENTITY CASCADE')
+	);
 
 	describe('POST /api/reflections/users', () => {
 		context('User validation,', () => {

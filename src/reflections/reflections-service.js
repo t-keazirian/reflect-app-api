@@ -25,17 +25,6 @@ const ReflectionsService = {
 		return knex.from('meditations').select('*').where('id', id).first();
 	},
 
-	// check on this one??
-	getMeditationByMood(knex, mood) {
-		return knex
-			.from('meditations')
-			.select('*')
-			.where('mood', mood)
-			.then(rows => {
-				return rows;
-			});
-	},
-
 	updateMeditation(knex, id, newMeditationFields) {
 		return knex.from('meditations').where({ id }).update(newMeditationFields);
 	},
