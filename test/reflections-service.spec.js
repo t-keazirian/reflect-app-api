@@ -1,5 +1,3 @@
-// did I write the migrations and the seeds correctly?
-
 const { expect } = require('chai');
 const supertest = require('supertest');
 const app = require('../src/app');
