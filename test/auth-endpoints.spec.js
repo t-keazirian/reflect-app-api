@@ -57,7 +57,7 @@ describe.only('Auth Endpoints', () => {
 			});
 		});
 
-		it(`responds with 400 'incorrect email or password when bad password`, () => {
+		it(`responds with 400 'incorrect email or password' when bad password`, () => {
 			const userInvalidPass = {
 				email: testUser.email,
 				password: 'incorrect',
@@ -65,6 +65,21 @@ describe.only('Auth Endpoints', () => {
 			return supertest(app)
 				.post('/api/auth/login')
 				.send(userInvalidPass)
+				.expect(400, {
+					error: {
+						message: 'Incorrect email or password',
+					},
+				});
+		});
+
+    it(`responds with 400 'incorrect email or password' when bad email`, () => {
+			const userInvalidEmail = {
+				email: 'email-not',
+				password: 'existy',
+			};
+			return supertest(app)
+				.post('/api/auth/login')
+				.send(userInvalidEmail)
 				.expect(400, {
 					error: {
 						message: 'Incorrect email or password',
