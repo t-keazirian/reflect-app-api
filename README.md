@@ -11,7 +11,7 @@
 
 # API Documentation:
 
-All reponses come in standard JSON.  All requests must include a content-type of application/json and the body must be valid JSON.
+All responses come in standard JSON.  All requests must include a content-type of application/json and the body must be valid JSON.
 
 ##### This REST API allows you to:
 * GET:
@@ -31,4 +31,12 @@ All reponses come in standard JSON.  All requests must include a content-type of
 * Live App GitHub Repo: https://github.com/t-keazirian/reflect-app
 
 #### This app is deployed through Heroku
+
+To seed the meditations table:
+
+psql -U dunder_mifflin -d reflections -f ./seeds/seed.meditations.sql 
+
+To seed the users table:
+
+psql -U dunder_mifflin -d reflections -f ./seeds/seed.users.sql
 
