@@ -3,14 +3,16 @@ const path = require('path');
 const ReflectionsService = require('./reflections-service');
 
 const xss = require('xss');
+const { requireAuth } = require('../middleware/jwt-auth');
 
 const reflectionsRouter = express.Router();
 const jsonParser = express.json();
 
 reflectionsRouter
-	.route('/')
+	.route('/:user_id')
+	.all(requireAuth)
 	.get((req, res, next) => {
-		ReflectionsService.getAllMeditations(req.app.get('db'), req.query)
+		ReflectionsService.getAllMeditations(req.app.get('db'), req.query, req.params.user_id)
 			.then(meditations => {
 				res.json(meditations);
 			})
@@ -39,6 +41,7 @@ reflectionsRouter
 
 reflectionsRouter
 	.route('/:id')
+	.all(requireAuth)
 	.all((req, res, next) => {
 		ReflectionsService.getMeditationById(req.app.get('db'), req.params.id)
 			.then(meditation => {

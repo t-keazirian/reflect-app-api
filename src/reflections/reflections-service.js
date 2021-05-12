@@ -1,9 +1,10 @@
 const ReflectionsService = {
-	getAllMeditations(knex, query) {
+	getAllMeditations(knex, query, user_id) {
 		// check query for white listed keys
 		return knex
 			.select('*')
 			.from('meditations')
+			.where({ user_id })
 			.modify(queryBuilder => {
 				if (query.mood) {
 					queryBuilder.where('current_mood', query.mood);
