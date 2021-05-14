@@ -29,6 +29,8 @@ reflectionsRouter
 				});
 			}
 		}
+    newMeditation.user_id = req.user.id;
+		
 		ReflectionsService.insertMeditation(req.app.get('db'), newMeditation)
 			.then(meditation => {
 				res
@@ -40,7 +42,7 @@ reflectionsRouter
 	});
 
 reflectionsRouter
-	.route('/:id')
+	.route('/meditations/:id')
 	.all(requireAuth)
 	.all((req, res, next) => {
 		ReflectionsService.getMeditationById(req.app.get('db'), req.params.id)

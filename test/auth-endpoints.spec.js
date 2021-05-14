@@ -7,7 +7,7 @@ const { makeAuthHeader } = require('./auth-helper.fixtures');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-describe.only('Auth Endpoints', () => {
+describe.skip('Auth Endpoints', () => {
 	let db;
 
 	const testUsers = makeUsersArray();

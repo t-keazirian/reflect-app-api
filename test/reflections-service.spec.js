@@ -3,6 +3,10 @@ const supertest = require('supertest');
 const app = require('../src/app');
 const knex = require('knex');
 const { makeMeditationsArray } = require('./reflections.fixtures');
+const { makeUsersArray } = require('./users.fixtures');
+const { makeAuthHeader } = require('./auth-helper.fixtures');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 describe('Reflections endpoint', () => {
 	let db;

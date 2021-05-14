@@ -1,6 +1,5 @@
 const ReflectionsService = {
 	getAllMeditations(knex, query, user_id) {
-		// check query for white listed keys
 		return knex
 			.select('*')
 			.from('meditations')

@@ -33,10 +33,10 @@ All responses come in standard JSON.  All requests must include a content-type o
 #### This app is deployed through Heroku
 
 To seed the meditations table:
-
 psql -U dunder_mifflin -d reflections -f ./seeds/seed.meditations.sql 
 
 To seed the users table:
-
 psql -U dunder_mifflin -d reflections -f ./seeds/seed.users.sql
 
+To connect to the database:
+pg_ctl -D /usr/local/var/postgres start

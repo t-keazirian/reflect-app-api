@@ -1,5 +1,3 @@
--- do I need to add in the minutes or date, or since it's default it doesn't need to be seeded and will default?
-
 TRUNCATE meditations;
 
 INSERT INTO meditations (description, minutes, current_mood, notes, date, user_id)
