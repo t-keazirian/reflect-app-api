@@ -13,18 +13,35 @@
 
 All responses come in standard JSON.  All requests must include a content-type of application/json and the body must be valid JSON.
 
-##### This REST API allows you to:
-* GET:
-  * Endpoint: /api/reflections
+##### REST APIs:
 
-* POST:
-  * Endpoint: /api/reflections
+** This app requires authorization/authentication. The front end provides a Demo account from the database, or the user can create their own.
 
+### Reflections endpoint: /api/reflections/:user_id
+- Must be a valid user in the database
+* GET
+* POST
+
+### Reflections endpoint: /api/reflections/meditations/:user_id
+- Must be a valid user in the database
 * DELETE
-  * Endpoint: /api/reflections/:id
-
 * PATCH
-  * Endpoint: /api/reflections/:id
+
+### Auth endpoint: /api/auth/login
+- Authorization Login for user in the database
+* POST
+
+### Auth endpoint: /api/auth/refresh
+- refresh authToken
+* POST
+
+### Users endpoint: /api/users 
+- create a new user in the database
+- create JWT for user
+
+* POST
+
+### 
 
 ### Links:
 * Live App: https://reflect-app-rouge.vercel.app/
