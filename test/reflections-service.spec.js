@@ -5,8 +5,8 @@ const knex = require('knex');
 const { makeMeditationsArray } = require('./reflections.fixtures');
 const { makeUsersArray } = require('./users.fixtures');
 const { makeAuthHeader } = require('./auth-helper.fixtures');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+// const bcrypt = require('bcryptjs');
+// const jwt = require('jsonwebtoken');
 
 describe('Reflections endpoint', () => {
 	let db;
@@ -19,42 +19,121 @@ describe('Reflections endpoint', () => {
 	});
 
 	after('disconnect from db', () => db.destroy());
-	before('clean table', () => db('meditations').truncate());
-	afterEach('cleanup', () => db('meditations').truncate());
+	before('clean table', () =>
+		db.raw('TRUNCATE meditations, users RESTART IDENTITY CASCADE')
+	);
+	afterEach('cleanup', () =>
+		db.raw('TRUNCATE meditations, users RESTART IDENTITY CASCADE')
+	);
 
-	describe('GET /api/reflections', () => {
+	describe('Unauthorized requests', () => {
+		const testMeditations = makeMeditationsArray();
+		const testUsers = makeUsersArray();
+
+		beforeEach('insert users and meditations', () => {
+			return db
+				.into('users')
+				.insert(testUsers)
+				.then(() => db.into('meditations').insert(testMeditations));
+		});
+
+		it(`responds with 401 'Missing bearer token' for GET /api/reflections`, () => {
+			return supertest(app)
+				.get('/api/reflections/123456')
+				.expect(401, { error: { message: 'Missing bearer token' } });
+		});
+	});
+
+	describe('GET /api/reflections/:user_id', () => {
+		const testMeditations = makeMeditationsArray();
+		const testUsers = makeUsersArray();
+		const authToken = makeAuthHeader(testUsers[0]);
+		const userId = testUsers[0].id;
+		const expectedMeditations = testMeditations.filter(
+			meditation => meditation.user_id === userId
+		);
+
+		before('insert users and meditations', () => {
+			return db
+				.into('users')
+				.insert(testUsers)
+				.then(() => db.into('meditations').insert(testMeditations));
+		});
+
+		// before('login auth', () => {
+		// 	const loginUser = {
+		// 		email: testUsers[0].email,
+		// 		password: 'passworD1!',
+		// 	};
+
+		// 	return supertest(app)
+		// 		.post(`/api/auth/login`)
+		// 		.send(loginUser)
+		// 		.then(res => {
+		// 			authToken = res.body.authToken;
+		// 		});
+		// });
+
 		context('Given no meditations', () => {
 			it('responds with 200 and an empty list', () => {
-				return supertest(app).get('/api/reflections').expect(200, []);
+				return supertest(app)
+					.get(`/api/reflections/3`)
+					.set('Authorization', authToken)
+					.expect(200, []);
 			});
 		});
 
 		context('Given there are meditations in the db', () => {
-			const testMeditations = makeMeditationsArray();
-
 			beforeEach('insert meditations', () => {
-				return db.into('meditations').insert(testMeditations);
+				return db
+					.into('users')
+					.insert(testUsers)
+					.then(() => db.into('meditations').insert(testMeditations));
 			});
 
 			it('responds with 200 and all the meditations', () => {
 				return supertest(app)
-					.get('/api/reflections')
-					.expect(200, testMeditations);
+					.get(`/api/reflections/${userId}`)
+					.set('Authorization', authToken)
+					.expect(200, expectedMeditations);
 			});
 		});
 	});
 
 	describe('POST /api/reflections', () => {
+		const testMeditations = makeMeditationsArray();
+		const testUsers = makeUsersArray();
+		const authToken = makeAuthHeader(testUsers[0]);
+		const userId = testUsers[0].id;
+		const expectedMeditations = testMeditations.filter(
+			meditation => meditation.user_id === userId
+		);
+
+		before('insert users and meditations', () => {
+			return db
+				.into('users')
+				.insert(testUsers)
+				.then(() => db.into('meditations').insert(testMeditations));
+		});
+
 		it('creates a new meditation, responding with 201 and the new meditation', () => {
+			// beforeEach('insert meditations', () => {
+			// 	return db
+			// 		.into('users')
+			// 		.insert(testUsers)
+			// 		.then(() => db.into('meditations').insert(testMeditations));
+			// });
 			const newMeditation = {
 				description: 'inspired',
 				minutes: 5,
 				notes: 'test notes',
 				current_mood: 'happy',
+				// user_id: 1
 			};
 
 			return supertest(app)
-				.post('/api/reflections')
+				.post(`/api/reflections/${userId}`)
+				.set('Authorization', authToken)
 				.send(newMeditation)
 				.expect(201)
 				.expect(res => {
@@ -63,14 +142,11 @@ describe('Reflections endpoint', () => {
 					expect(res.body.notes).to.eql(newMeditation.notes);
 					expect(res.body.current_mood).to.eql(newMeditation.current_mood);
 					expect(res.body).to.have.property('id');
-					expect(res.headers.location).to.eql(
-						`/api/reflections/${res.body.id}`
-					);
 				})
-				.then(postRes => {
-					supertest(app).get(`/api/reflections/${postRes.body.id}`);
-					expect(postRes.body);
-				});
+				// .then(postRes => {
+				// 	supertest(app).get(`/api/reflections/${postRes.body.id}`);
+				// 	expect(postRes.body);
+				// });
 		});
 
 		const requiredFields = ['description', 'current_mood', 'notes'];
@@ -94,6 +170,8 @@ describe('Reflections endpoint', () => {
 					});
 			});
 		});
+
+		/*
 
 		context('Given an XSS attack', () => {
 			it('removes XSS attack content', () => {
@@ -128,6 +206,8 @@ describe('Reflections endpoint', () => {
 		});
 	});
 
+	
+
 	describe('DELETE /api/reflections/:id', () => {
 		context('Given no meditations', () => {
 			it('responds with 404', () => {
@@ -158,6 +238,7 @@ describe('Reflections endpoint', () => {
 					});
 			});
 		});
+		*/
 	});
 
 	describe('GET /api/reflections/:id', () => {

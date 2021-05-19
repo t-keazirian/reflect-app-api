@@ -6,7 +6,7 @@ const { makeUsersArray } = require('./users.fixtures');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-describe.skip('Users Endpoint', () => {
+describe('Users Endpoint', () => {
 	let db;
 	before('make knex instance', () => {
 		db = knex({
@@ -156,8 +156,8 @@ describe.skip('Users Endpoint', () => {
 				const newUser = {
 					first_name: 'test first name',
 					last_name: 'test last name',
-					email: 'testuser@email.com',
-					password: '11TT2233!!',
+					email: 'testuser123@email.com',
+					password: '11tT2233!!',
 				};
 
 				return supertest(app)
@@ -170,9 +170,6 @@ describe.skip('Users Endpoint', () => {
 						expect(res.body.last_name).to.eql(newUser.last_name);
 						expect(res.body.email).to.eql(newUser.email);
 						expect(res.body).to.not.have.property('password');
-						// expect(res.headers.location).to.eql(
-						// 	`/api/users/${res.body.id}`
-						// );
 					})
 					.expect(res => {
 						db.from('users')
